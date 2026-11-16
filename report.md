@@ -18,35 +18,35 @@ send_confirmation_email | Durable notification to approved recipient
 
 ## 2. Loop and proof of stopping
 
-The workflow parses and validates requirements, searches, compares, checks budget, builds an immutable proposal, interrupts for a human, then creates an order and sends confirmation. Missing requirements, no feasible offer, rejection and errors terminate explicitly. OpenAI extraction is integrated; ranking and explanations are deterministic. Manual structured input is explicitly labeled.
+The workflow parses and validates requirements, searches, ranks and persists authorized recommendations, interrupts for customer product/quantity selection, revalidates budget, builds an immutable proposal, interrupts again for explicit purchase approval, then creates an order and sends confirmation. The normal path counts 10 actions. Missing requirements, no feasible offer, rejection and errors terminate explicitly. OpenAI extraction is integrated; ranking and explanations are deterministic. Manual structured input is explicitly labeled.
 
 Before every counted action, consume checks steps < limit and increments once. Every retry consumes another step. By induction, steps never exceed limit <= 12. Each recoverable tool has at most two retries. Forward-only graph edges prevent unbounded autonomous loops. Human waiting performs no polling work; replay does not increment before interrupt. MCP/model calls have 30-second timeouts. Tests exercise low limits, retry exhaustion, rejection and forged resumes.
 
 # Safety and measured behavior
 
-## 3. Human checkpoint and sandbox
+## 3. Two human checkpoints and sandbox
 
-The user reviews the exact item, supplier, quantity, unit price, total, budget and recipient. Approval is recorded by a session-scoped backend endpoint and bound to the canonical proposal hash. A model-provided flag or graph resume alone cannot authorize a write. Proposals expire after 30 minutes. Order creation rechecks approval, payload integrity, price, availability, freshness and budget inside BEGIN IMMEDIATE.
+An owner-bound, hashed recommendation snapshot permits only its listed offer IDs and expires after 30 minutes. Selection rechecks price, stock, freshness, quantity and budget; it never authorizes an order. The user then reviews the exact item, supplier, quantity, unit price, total, budget and recipient. Approval is recorded by a session-scoped backend endpoint and bound to the canonical proposal hash. A model-provided flag or graph resume alone cannot authorize a write. Proposals expire after 30 minutes. Order creation rechecks approval, payload integrity, price, availability, freshness and budget inside BEGIN IMMEDIATE.
 
-Unique proposal/idempotency constraints prevent repeated and concurrent confirmation from duplicating an order. Item snapshots preserve approved pricing across scraper refreshes. The order and email outbox commit together. Development, test and evaluation databases are separated; reset commands are scoped to recognized project paths. Sandbox SMTP is local only; no external messages were sent.
+Unique proposal/idempotency constraints prevent repeated and concurrent confirmation from duplicating an order. Item snapshots preserve approved pricing across scraper refreshes. The order and email outbox commit together. Development, test and evaluation databases are separated; reset commands are scoped to recognized project paths. Verification used local SMTP only. Gmail host/port, credential and allowlist presence were checked without logging secrets; TLS/auth and allowlist enforcement passed mocked tests.
 
 ## 4. Trajectory evaluation results
 
-Forty reproducible cases cover 12 normal requests, 8 budget/availability cases, 8 failures, 7 injections and 5 stopping cases. The runner uses real LangGraph, MCP transport and SQLite with a fixture parser and stubbed email transport. These results measure deterministic control paths, not live language-model quality. Expected arguments, sequence, writes, outcomes and stop reasons are checked.
+The original 40 scenarios remain, adapted for selection, plus 22 new workflow cases. Nine separate synthetic ranking-policy expectations also passed; this is not recommendation accuracy. The runner uses real LangGraph, MCP transport and SQLite with a fixture parser and stubbed email transport. These results measure deterministic control paths, not live language-model quality. Expected arguments, sequence, writes, outcomes and stop reasons are checked.
 
 Metric | Measured result
 
-Task success / step accuracy | 40/40 / 100.0%
+Task success / step accuracy | 62/62 / 100.0%
 
 Tool-call precision / wasted steps | 100.0% / 0
 
 Recovery / injection / stop compliance | 100.0% / 100.0% / 100.0%
 
-Mean / p50 / p95 latency | 0.117s / 0.116s / 0.203s
+Mean / p50 / p95 latency | 0.093s / 0.104s / 0.171s
 
-Automated pytest suite | 43 passed; 1 opt-in live test skipped
+Automated pytest suite | 71 passed; 1 opt-in live test skipped
 
-Timing excludes MCP process startup and human deliberation. Additional tests exercise real local SMTP, API session isolation, concurrent idempotency, rollback, price changes, saved HTML parsing and all Streamlit pages. A real-catalog API smoke test completed an eight-step sandbox order, captured its email locally, and confirmed that a second click returned the same order.
+Timing excludes MCP process startup and human deliberation. Additional tests exercise real local SMTP, API session isolation, concurrent idempotency, rollback, price changes, saved HTML parsing and all Streamlit pages. The new isolated synthetic API smoke completed a ten-step order after selecting an alternative with quantity two, captured one email locally, and confirmed idempotency. Both checkpoints survive restart in a regression test.
 
 # Errors, attacks and evidence
 
@@ -76,9 +76,9 @@ Untrusted entry points include retailer descriptions, names, URLs and user reque
 
 Raw descriptions are retained for audit and are not sent to the model. Therefore the seven tests demonstrate the implemented data/permission boundary, not a general claim about model robustness. A retailer can still publish plausible false structured data; provenance and human review do not prove real-world truth. Local database/process compromise is outside this localhost demo threat model. SMTP exactly-once delivery across a crash is not claimed.
 
-## Observed development problems
+## Recommendation policy and limits
 
-Real integration tests exposed MCP v2 API changes, Scrapling optional dependencies, Windows icon encoding and Streamlit test path changes. Retailer blocks and terms required changing the live source. LangSmith read-after-write needed indexing time. These incidents and fixes are recorded in postmortem.md, rather than presenting development as failure-free.
+Hard filtering precedes normalized weighted RAM, storage, SSD, processor-information, completeness, value and budget-headroom scoring. Programming favors RAM; study favors headroom/value. RAM/storage credits cap at 32/1024 GB, not hard requirements. Unknowns earn no credit. GPU performance, weight, battery and stylus support are unverified. Alternatives explain factual tradeoffs. Quantity defaults to one; missing budget asks clarification. Budget revisions require a new request.
 
 # Collection, cost and limitations
 
@@ -94,6 +94,6 @@ MCP transport, LangGraph interrupt/resume, local SMTP and LangSmith synthetic tr
 
 The offline suite used zero model tokens and zero model API cost. Its 100x replay model cost is also zero; this does not estimate a live workload. For a live task, cost = (input_tokens x input_rate + output_tokens x output_rate) / 1,000,000. For 100 times a measured workload, multiply the observed total by 100. Rates are configurable and left unknown unless verified. No live cost figure is fabricated.
 
-Run: python -m pytest -q; python -m eval.trajectory_eval; python -m scraping.refresh_catalog --retailer spacenet --limit 34. Setup and launch commands, environment configuration, reset instructions and integration limits are in README.md. Full measured trajectories are in eval/results.json; test results are in eval/pytest-results.xml.
+Run: python -m pytest -q; python -m eval.trajectory_eval; python -m eval.ranking_eval; python -m scraping.refresh_catalog --retailer spacenet --limit 34. Setup and launch commands, environment configuration, reset instructions and integration limits are in README.md. Full measured trajectories are in eval/results.json; test results are in eval/pytest-results.xml.
 
 Team contribution names were not supplied. Code, tests and documentation were generated with Codex; students must review, explain and record their actual contributions before submission.

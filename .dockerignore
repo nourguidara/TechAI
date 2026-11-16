@@ -4,3 +4,16 @@ data
 .git
 __pycache__
 tmp
+
+.env.*
+!.env.example
+venv
+.pytest_cache
+output
+*.db
+*.db-*
+*.sqlite*
+*.log
+.streamlit/secrets.toml
+*.pem
+*.key

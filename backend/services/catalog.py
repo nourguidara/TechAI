@@ -50,10 +50,9 @@ def search_products(data):
 def compare_offers(data):
     with Session() as db:
         offers = [o for o in db.scalars(select(Offer).where(Offer.id.in_(data.offer_ids))).all() if matches(o,data.requirements)]
-        offers.sort(key=lambda o: (o.price_tnd, -o.scraped_at.timestamp(), o.id))
-        return [dict(**serialize(o), total_tnd=str(o.price_tnd*data.requirements.quantity),
-            ranking_reason='Meets hard requirements; lowest total first, freshest data breaks ties.',
-            stock_note='Quantity not published; sandbox order only.' if o.available_quantity is None else 'Published quantity sufficient.') for o in offers]
+        from backend.services.ranking import rank
+        return rank([serialize(o) for o in offers],data.requirements)
+
 
 def get_offer_details(data):
     with Session() as db:

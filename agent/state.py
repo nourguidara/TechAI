@@ -11,6 +11,8 @@ class AgentState(TypedDict, total=False):
     offers: list[dict]
     comparison: list[dict]
     budget_result: dict
+    selection: dict
+    selected_offer_id: int
     proposal: dict
     order: dict
     email_result: dict

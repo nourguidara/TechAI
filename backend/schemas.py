@@ -7,13 +7,18 @@ class StrictModel(BaseModel):
 
 class Requirements(StrictModel):
     category: Literal['laptop','desktop','tablet'] | None = None
-    quantity: int | None = Field(default=None, ge=1, le=100)
+    quantity: int | None = Field(default=1, ge=1, le=100)
     brands: list[str] = Field(default_factory=list, max_length=20)
     min_ram: int | None = Field(default=None, ge=0, le=1024)
     min_storage: int | None = Field(default=None, ge=0, le=100000)
     processor: str | None = Field(default=None, max_length=100)
     storage_type: Literal['SSD','HDD','eMMC'] | None = None
     budget: Decimal | None = Field(default=None, gt=0, le=10000000, decimal_places=3)
+    intended_use: list[Literal['general','programming','machine_learning','gaming','study','notes','media','video_editing','work']] = Field(default_factory=list, max_length=9)
+    priorities: list[Literal['ram','storage','value','budget_headroom','data_confidence','portability','battery','graphics']] = Field(default_factory=list, max_length=8)
+    preferred_brands: list[str] = Field(default_factory=list, max_length=20)
+    soft_preferences: list[str] = Field(default_factory=list, max_length=8)
+    # Legacy field retained for unsupported HARD requirements that require clarification.
     other_preferences: str = Field(default='', max_length=1000)
 
 class SearchInput(StrictModel):
@@ -78,6 +83,14 @@ class ComparisonOutput(OfferOutput):
     total_tnd: str
     ranking_reason: str
     stock_note: str
+    label: str
+    suitability_score: float
+    score_components: dict[str, float]
+    facts: list[str]
+    limitations: list[str]
+    tradeoffs: list[str]
+    remaining_budget_tnd: str
+    scoring_version: str
 
 class BudgetOutput(StrictModel):
     total: str
@@ -104,3 +117,9 @@ class OrderOutput(StrictModel):
 class EmailOutput(StrictModel):
     status: Literal['pending','failed','sent','sending','delivery_unknown']
     error: str | None = None
+
+
+class SelectionInput(StrictModel):
+    selection_id: str = Field(min_length=32, max_length=32)
+    offer_id: int = Field(gt=0, strict=True)
+    quantity: int = Field(ge=1, le=100, strict=True)

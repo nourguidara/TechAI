@@ -4,7 +4,7 @@ from langgraph.types import interrupt
 from langchain_openai import ChatOpenAI
 from backend.config import settings
 from backend.schemas import Requirements
-from backend.services.orders import make_proposal
+from backend.services.selection import prepare_selection, trusted_choice, selected_proposal
 from agent.state import AgentState
 from agent.stop_rules import consume
 from agent.prompts import EXTRACT
@@ -54,7 +54,9 @@ def build_graph(checkpointer, mcp_session, parser=parse_openai, caller=None):
     @guarded
     async def validate_request(s):
         r=Requirements.model_validate(s['requirements'])
-        missing=[k for k in ('category','quantity','budget') if getattr(r,k) is None]
+        if r.quantity is None: r.quantity=1
+        s['requirements']=r.model_dump(mode='json')
+        missing=[k for k in ('category','budget') if getattr(r,k) is None]
         if missing or r.other_preferences:
             s.update(status='clarification',stop_reason='missing_or_unsupported_requirements',
                 explanation='Please specify '+', '.join(missing or ['supported technical requirements'])+'. Unsupported constraints: '+r.other_preferences)
@@ -71,18 +73,33 @@ def build_graph(checkpointer, mcp_session, parser=parse_openai, caller=None):
         return s
     @guarded
     async def check_budget(s):
-        s['budget_result']=await call(s,'check_budget',dict(offer_id=s['comparison'][0]['id'],quantity=s['requirements']['quantity'],budget=s['requirements']['budget']))
+        s['budget_result']=await call(s,'check_budget',dict(offer_id=s['selected_offer_id'],quantity=s['requirements']['quantity'],budget=s['requirements']['budget']))
         if not s['budget_result']['valid']: s.update(status='no_feasible_offer',stop_reason='budget_exceeded')
+        return s
+    @guarded
+    async def generate_recommendations(s):
+        consume(s,'generate_recommendations')
+        s['selection']=prepare_selection(s['session_id'],s['requirements'])
+        s['comparison']=s['selection']['recommendations']
+        s['explanation']='Review the estimated best fit and alternatives, then select a product and quantity. Selection is not purchase approval.'
+        return s
+    async def human_selection(s):
+        interrupt({'kind':'product_selection',**s['selection']})
+        try:
+            choice=trusted_choice(s['selection']['id'],s['session_id'])
+            consume(s,'human_selection')
+            s['requirements']=choice['requirements']; s['selected_offer_id']=choice['offer_id']
+        except Exception as exc:
+            s.update(status='error',stop_reason=str(exc)[:300])
         return s
     @guarded
     async def generate_proposal(s):
         consume(s,'generate_proposal')
-        s['proposal']=make_proposal(s['session_id'],s['email'],s['requirements'],s['comparison'][0]['id'])
-        s['explanation']=s['comparison'][0]['ranking_reason']+' '+s['comparison'][0]['stock_note']
+        s['proposal']=selected_proposal(s['selection']['id'],s['session_id'],s['email'])
         return s
     async def human_approval(s):
         # Interrupt before any step increment: LangGraph replays this node on resume.
-        interrupt(s['proposal'])
+        interrupt({'kind':'purchase_approval',**s['proposal']})
         from backend.database import Session
         from backend.models import Proposal
         with Session() as db:
@@ -109,8 +126,8 @@ def build_graph(checkpointer, mcp_session, parser=parse_openai, caller=None):
     async def finalize(s):
         return s
     graph=StateGraph(AgentState)
-    nodes=[parse_request,validate_request,search_products,compare_offers,check_budget,generate_proposal,human_approval,create_order,send_confirmation,finalize]
-    names=['parse_request','validate_request','search_products','compare_offers','check_budget','generate_proposal','human_approval','create_order','send_confirmation','finalize']
+    nodes=[parse_request,validate_request,search_products,compare_offers,generate_recommendations,human_selection,check_budget,generate_proposal,human_approval,create_order,send_confirmation,finalize]
+    names=['parse_request','validate_request','search_products','compare_offers','generate_recommendations','human_selection','check_budget','generate_proposal','human_approval','create_order','send_confirmation','finalize']
     for name,fn in zip(names,nodes): graph.add_node(name,fn)
     graph.add_edge(START,names[0])
     for current,next_name in zip(names[:-1],names[1:]):

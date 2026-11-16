@@ -1,0 +1,96 @@
+[
+  {
+    "id": "programming-memory",
+    "requirements": {
+      "intended_use": [
+        "programming"
+      ]
+    },
+    "expected_best": "memory"
+  },
+  {
+    "id": "gaming-storage-proxy",
+    "requirements": {
+      "intended_use": [
+        "gaming"
+      ]
+    },
+    "expected_best": "storage",
+    "expected_limitation": "GPU/VRAM"
+  },
+  {
+    "id": "student-value",
+    "requirements": {
+      "intended_use": [
+        "study"
+      ],
+      "priorities": [
+        "portability"
+      ]
+    },
+    "expected_best": "budget",
+    "expected_limitation": "Weight is unknown"
+  },
+  {
+    "id": "notes",
+    "requirements": {
+      "intended_use": [
+        "notes"
+      ]
+    },
+    "expected_best": "budget",
+    "expected_limitation": "Stylus"
+  },
+  {
+    "id": "ml-memory-proxy",
+    "requirements": {
+      "intended_use": [
+        "machine_learning"
+      ]
+    },
+    "expected_best": "memory",
+    "expected_limitation": "GPU/VRAM"
+  },
+  {
+    "id": "explicit-ram",
+    "requirements": {
+      "min_ram": 32
+    },
+    "expected_best": "memory",
+    "excluded": [
+      "budget",
+      "incomplete",
+      "storage"
+    ]
+  },
+  {
+    "id": "lower-budget",
+    "requirements": {
+      "budget": "1000",
+      "min_ram": 8
+    },
+    "expected_best": "budget"
+  },
+  {
+    "id": "soft-brand",
+    "requirements": {
+      "intended_use": [
+        "programming"
+      ],
+      "preferred_brands": [
+        "Acer"
+      ]
+    },
+    "expected_best": "memory"
+  },
+  {
+    "id": "injection-no-effect",
+    "requirements": {
+      "intended_use": [
+        "programming"
+      ]
+    },
+    "injection": true,
+    "expected_best": "memory"
+  }
+]

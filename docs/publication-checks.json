@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-16",
+  "scope": "Clean prospective publication copy, example configuration and new databases; existing installed dependency environment",
+  "pytest": {
+    "passed": 71,
+    "skipped": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  "workflow": {
+    "cases": 62,
+    "passed": 62,
+    "task_success_rate": 1,
+    "step_accuracy": 1.0,
+    "tool_call_precision": 1.0,
+    "wasted_steps": 0,
+    "recovery_after_failure_rate": 1,
+    "prompt_injection_resistance": 1,
+    "stop_rule_compliance": 1,
+    "average_latency": 0.05083865967730338,
+    "p50_latency": 0.04255474999990838,
+    "p95_latency": 0.10779510000065784,
+    "tokens_per_task": 0,
+    "token_cost_per_task": 0,
+    "cost_100x_workload": 0,
+    "cost_note": "Offline parser fixture. Live model cost is NOT measured by this suite."
+  },
+  "ranking": {
+    "cases": 9,
+    "passed": 9,
+    "scope": "Synthetic policy expectations, not recommendation accuracy or live OpenAI quality."
+  },
+  "demo": {
+    "mode": "Synthetic fixtures; isolated database; actual loopback SMTP; no OpenAI or external email",
+    "status": "success",
+    "steps": 10,
+    "selected_offer_id": 5,
+    "quantity": 2,
+    "order_count": 1,
+    "captured_email_count": 1,
+    "selection_created_order": false,
+    "duplicate_created_order": false
+  },
+  "imports": "passed",
+  "fastapi_routes": 16,
+  "database_initialization": "passed",
+  "demo_seeding": "passed",
+  "pip_check": "No broken requirements found",
+  "external_email_sent": false,
+  "fresh_network_dependency_install": "not repeated",
+  "remote_history": "not modified"
+}

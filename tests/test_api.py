@@ -7,7 +7,11 @@ def test_api_approval_and_isolation():
         other={'Authorization':'Bearer '+c.post('/sessions').json()['token']}
         r=c.post('/structured-request',headers=headers,json={'email':'student@example.com','requirements':{'category':'laptop','quantity':2,'budget':'4000'}})
         assert r.status_code==200,r.text
-        state=r.json(); assert state['status']=='awaiting_approval'
+        state=r.json(); assert state['status']=='awaiting_selection'
+        assert 'proposal' not in state
+        chosen=c.post('/runs/'+state['thread_id']+'/selection',headers=headers,json={'selection_id':state['selection']['id'],'offer_id':state['comparison'][0]['id'],'quantity':2})
+        assert chosen.status_code==200,chosen.text
+        state=chosen.json(); assert state['status']=='awaiting_approval'
         p=state['proposal']; path='/runs/'+state['thread_id']+'/approval'
         decision={'proposal_id':p['id'],'proposal_hash':p['hash'],'approve':True}
         assert c.post(path,headers=other,json=decision).status_code==404

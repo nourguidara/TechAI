@@ -37,3 +37,28 @@ Thumbs.db
 # Local generated evaluation results
 eval/results.json
 eval/pytest-results.xml
+# Local inspection captures and generated publication previews
+/tmp/
+/output/
+/data/inspection/
+/data/recommendation-demo-*/
+/data/smoke-demo.json
+/data/langsmith-verification.json
+/eval/langsmith-verification.json
+/eval/ranking-results.json
+/eval/email-configuration.json
+/eval/upgrade-live-status.json
+/eval/repository-audit.json
+/eval/publication-*
+# Other credential formats and local tooling
+.streamlit/secrets.toml
+.envrc
+*.pem
+*.key
+*.p12
+*.pfx
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/

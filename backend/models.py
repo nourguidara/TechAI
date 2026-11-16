@@ -107,3 +107,16 @@ class AgentRun(Base):
     trajectory: Mapped[list] = mapped_column(JSON, default=list)
     started_at: Mapped[datetime] = mapped_column(default=now)
     completed_at: Mapped[datetime | None]
+
+
+class ShoppingSelection(Timestamps, Base):
+    __tablename__ = 'shopping_selections'
+    id: Mapped[str] = mapped_column(primary_key=True)
+    user_session_id: Mapped[str] = mapped_column(index=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    payload_hash: Mapped[str]
+    status: Mapped[str] = mapped_column(default='pending')
+    selected_offer_id: Mapped[int | None] = mapped_column(ForeignKey('supplier_offers.id'))
+    selected_quantity: Mapped[int | None]
+    selected_at: Mapped[datetime | None]
+    expires_at: Mapped[datetime]
