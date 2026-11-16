@@ -1,0 +1,109 @@
+from datetime import datetime, timezone
+from decimal import Decimal
+from sqlalchemy import String, Integer, Numeric, DateTime, ForeignKey, JSON, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from backend.database import Base
+
+def now():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+class Timestamps:
+    created_at: Mapped[datetime] = mapped_column(default=now)
+    updated_at: Mapped[datetime] = mapped_column(default=now, onupdate=now)
+
+class Product(Timestamps, Base):
+    __tablename__ = 'products'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    signature: Mapped[str] = mapped_column(unique=True)
+    category: Mapped[str] = mapped_column(index=True)
+    brand: Mapped[str | None]
+    model: Mapped[str | None]
+    name: Mapped[str]
+    processor: Mapped[str | None]
+    ram_gb: Mapped[int | None]
+    storage_gb: Mapped[int | None]
+    storage_type: Mapped[str | None]
+    screen_size: Mapped[float | None]
+    operating_system: Mapped[str | None]
+    raw_specifications: Mapped[dict] = mapped_column(JSON, default=dict)
+    offers: Mapped[list['Offer']] = relationship(back_populates='product')
+
+class Offer(Timestamps, Base):
+    __tablename__ = 'supplier_offers'
+    __table_args__ = (UniqueConstraint('supplier_name', 'supplier_product_id'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), index=True)
+    supplier_name: Mapped[str]
+    supplier_product_id: Mapped[str]
+    price_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    stock_status: Mapped[str]
+    available_quantity: Mapped[int | None]
+    product_url: Mapped[str] = mapped_column(unique=True)
+    image_url: Mapped[str | None]
+    scraped_at: Mapped[datetime] = mapped_column(default=now)
+    is_demo: Mapped[bool] = mapped_column(default=False)
+    product: Mapped[Product] = relationship(back_populates='offers')
+
+class Proposal(Timestamps, Base):
+    __tablename__ = 'purchase_proposals'
+    id: Mapped[str] = mapped_column(primary_key=True)
+    user_session_id: Mapped[str] = mapped_column(index=True)
+    proposal_payload: Mapped[dict] = mapped_column(JSON)
+    proposal_hash: Mapped[str]
+    budget_limit_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    total_amount_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    status: Mapped[str] = mapped_column(default='pending')
+    approved_at: Mapped[datetime | None]
+    expires_at: Mapped[datetime]
+
+class Order(Timestamps, Base):
+    __tablename__ = 'purchase_orders'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    proposal_id: Mapped[str] = mapped_column(ForeignKey('purchase_proposals.id'), unique=True)
+    user_session_id: Mapped[str] = mapped_column(index=True)
+    order_reference: Mapped[str] = mapped_column(unique=True)
+    user_email: Mapped[str]
+    status: Mapped[str] = mapped_column(default='sandbox_confirmed')
+    approval_status: Mapped[str] = mapped_column(default='approved')
+    approved_at: Mapped[datetime]
+    budget_limit_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    total_amount_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    idempotency_key: Mapped[str] = mapped_column(unique=True)
+    items: Mapped[list['OrderItem']] = relationship()
+    notifications: Mapped[list['Notification']] = relationship()
+
+class OrderItem(Base):
+    __tablename__ = 'order_items'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey('purchase_orders.id'))
+    offer_id: Mapped[int] = mapped_column(ForeignKey('supplier_offers.id'))
+    product_name_snapshot: Mapped[str]
+    supplier_snapshot: Mapped[str]
+    unit_price_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+    quantity: Mapped[int]
+    subtotal_tnd: Mapped[Decimal] = mapped_column(Numeric(14,3))
+
+class Notification(Base):
+    __tablename__ = 'email_notifications'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey('purchase_orders.id'), unique=True)
+    recipient: Mapped[str]
+    status: Mapped[str] = mapped_column(default='pending')
+    attempts: Mapped[int] = mapped_column(default=0)
+    last_error: Mapped[str | None]
+    sent_at: Mapped[datetime | None]
+    idempotency_key: Mapped[str] = mapped_column(unique=True)
+
+class AgentRun(Base):
+    __tablename__ = 'agent_runs'
+    id: Mapped[str] = mapped_column(primary_key=True)
+    thread_id: Mapped[str] = mapped_column(unique=True)
+    user_session_id: Mapped[str] = mapped_column(index=True)
+    status: Mapped[str] = mapped_column(default='running')
+    steps_executed: Mapped[int] = mapped_column(default=0)
+    stop_reason: Mapped[str | None]
+    total_tokens: Mapped[int] = mapped_column(default=0)
+    estimated_cost: Mapped[float | None]
+    trajectory: Mapped[list] = mapped_column(JSON, default=list)
+    started_at: Mapped[datetime] = mapped_column(default=now)
+    completed_at: Mapped[datetime | None]

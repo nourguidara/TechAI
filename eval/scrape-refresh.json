@@ -1,0 +1,16 @@
+[
+  {
+    "retailer": "spacenet",
+    "category": "laptop",
+    "pages_visited": 2,
+    "products_discovered": 1,
+    "products_extracted": 1,
+    "inserted": 0,
+    "updated": 1,
+    "errors": [],
+    "skipped_by_robots": 0,
+    "robots_disallowed_count": 0,
+    "failed_requests_count": 0,
+    "execution_seconds": 22.32164080000075
+  }
+]

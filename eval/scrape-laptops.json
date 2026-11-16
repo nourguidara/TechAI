@@ -1,0 +1,18 @@
+[
+  {
+    "retailer": "spacenet",
+    "category": "laptop",
+    "pages_visited": 35,
+    "products_discovered": 34,
+    "products_extracted": 33,
+    "inserted": 33,
+    "updated": 0,
+    "errors": [
+      "Timeout: Failed to perform, curl: (28) Operation timed out after 25005 milliseconds with 0 bytes received. Se"
+    ],
+    "skipped_by_robots": 0,
+    "robots_disallowed_count": 0,
+    "failed_requests_count": 1,
+    "execution_seconds": 404.6491836999994
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "mode": "manual structured request; real scraped catalog",
+  "status": "success",
+  "steps": 8,
+  "order": {
+    "id": 2,
+    "reference": "TS-06EED28789BD",
+    "status": "sandbox_confirmed",
+    "total": "159.000",
+    "created_at": "2026-11-15T23:49:37.094407",
+    "email_status": "sent",
+    "items": [
+      {
+        "name": "Tablette Blackview TAB 50 Kids Wifi 3Go 64Go Bleu",
+        "supplier": "spacenet",
+        "quantity": 1,
+        "unit_price": "159.000",
+        "subtotal": "159.000"
+      }
+    ]
+  },
+  "email_result": {
+    "status": "sent",
+    "error": null
+  },
+  "thread_id": "70ec9e3095874e6a987b1329de20b2f3",
+  "duplicate_confirm_created_second_order": false
+}

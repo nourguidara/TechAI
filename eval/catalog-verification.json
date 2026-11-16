@@ -1,0 +1,26 @@
+{
+  "real_offers": 101,
+  "demo_offers": 0,
+  "by_supplier": {
+    "spacenet": 101
+  },
+  "by_category": {
+    "desktop": 34,
+    "tablet": 34,
+    "laptop": 33
+  },
+  "stock_status": {
+    "in_stock": 67,
+    "unknown": 34
+  },
+  "specification_coverage": {
+    "brand": 100,
+    "processor": 99,
+    "ram_gb": 101,
+    "storage_gb": 101,
+    "storage_type": 63,
+    "screen_size": 70,
+    "operating_system": 96
+  },
+  "validation": "passed: positive prices, allowed source URLs, timestamps, stock enum, quantity validity, unique source URLs"
+}

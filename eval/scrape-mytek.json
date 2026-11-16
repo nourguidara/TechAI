@@ -1,0 +1,18 @@
+[
+  {
+    "retailer": "mytek",
+    "category": "laptop",
+    "pages_visited": 0,
+    "products_discovered": 0,
+    "products_extracted": 0,
+    "inserted": 0,
+    "updated": 0,
+    "errors": [
+      "robots_check_failed_or_disallowed; no requests made"
+    ],
+    "skipped_by_robots": 0,
+    "robots_disallowed_count": 1,
+    "failed_requests_count": 0,
+    "execution_seconds": 25.1153075000002
+  }
+]

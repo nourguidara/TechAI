@@ -1,0 +1,38 @@
+[
+  {
+    "retailer": "spacenet",
+    "category": "laptop",
+    "pages_visited": 0,
+    "products_discovered": 0,
+    "products_extracted": 0,
+    "inserted": 0,
+    "updated": 0,
+    "errors": [],
+    "skipped_by_robots": 0,
+    "execution_seconds": 25.122801400000753
+  },
+  {
+    "retailer": "spacenet",
+    "category": "desktop",
+    "pages_visited": 36,
+    "products_discovered": 34,
+    "products_extracted": 34,
+    "inserted": 34,
+    "updated": 0,
+    "errors": [],
+    "skipped_by_robots": 0,
+    "execution_seconds": 381.13826939999853
+  },
+  {
+    "retailer": "spacenet",
+    "category": "tablet",
+    "pages_visited": 36,
+    "products_discovered": 34,
+    "products_extracted": 34,
+    "inserted": 34,
+    "updated": 0,
+    "errors": [],
+    "skipped_by_robots": 0,
+    "execution_seconds": 378.4648663000007
+  }
+]
